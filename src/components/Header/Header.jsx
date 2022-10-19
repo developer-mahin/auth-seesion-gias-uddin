@@ -1,11 +1,42 @@
 import "./Header.css";
 import { Link } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { UserContext } from "../Layout/Main";
+import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
+import app from "../../Hooks/firebase.config";
+import Swal from "sweetalert2";
 
 const Header = () => {
-  const {user} = useContext(UserContext)
+  const { user, setUser } = useContext(UserContext);
+  const auth = getAuth(app);
 
+  const handleLogOut = () => {
+    
+    signOut(auth)
+      .then(() => {
+        // Sign-out successful.
+        Swal.fire("Good job!", "You clicked the button!", "success");
+      })
+      .catch((error) => {
+        // An error happened.
+      });
+  };
+
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        const uid = user.uid;
+        setUser(user)
+        // ...
+      } else {
+        // User is signed out
+        // ...
+      }
+    });
+  }, []);
 
   return (
     <div>
@@ -21,23 +52,26 @@ const Header = () => {
           <Link to="/home" className="text-decoration-none">
             <li className="nav-link items  ms-3 text-info fw-bolder">Home</li>
           </Link>
-          <Link to="/login" className="text-decoration-none">
-            <li className="nav-link items  ms-3 text-info fw-bolder">Login</li>
-          </Link>
-
-          <li
-            role="button"
-            className="nav-link items  ms-3 text-info fw-bolder"
-          >
-            Logout
-          </li>
-
+          {user?.uid ? (
+            <li
+              onClick={handleLogOut}
+              role="button"
+              className="nav-link items  ms-3 text-info fw-bolder"
+            >
+              Logout
+            </li>
+          ) : (
+            <Link to="/login" className="text-decoration-none">
+              <li className="nav-link items  ms-3 text-info fw-bolder">
+                Login
+              </li>
+            </Link>
+          )}
           <Link to="/register" className="text-decoration-none">
             <li className="nav-link items  ms-3 text-info fw-bolder">
-              Registration
+              Register
             </li>
           </Link>
-
           <Link to="/about" className="text-decoration-none">
             <li className="nav-link items  ms-3 text-info fw-bolder">About</li>
           </Link>
