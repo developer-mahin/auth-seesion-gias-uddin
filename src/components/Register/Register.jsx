@@ -1,12 +1,25 @@
 import React from "react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  sendEmailVerification,
+  updateProfile,
+} from "firebase/auth";
+import app from "../../Hooks/firebase.config";
+import { toast } from "react-toastify";
+import Swal from 'sweetalert2'
+
+
 
 const Register = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isDisable, setIsDisable] = useState(true);
+  const auth = getAuth(app);
 
   const handleName = (e) => {
     setName(e.target.value);
@@ -15,10 +28,80 @@ const Register = () => {
   const handleEmail = (e) => {
     const validation = /\S+@\S+\.\S+/.test(e.target.value);
     if (!validation) {
-      setError("please enter valid email");
+      setError("Please enter valid email");
+      return;
     }
-    setEmail(validation);
+    setEmail(e.target.value);
     setError("");
+  };
+
+  const handlePassword = (e) => {
+    if (!/.{8}/.test(e.target.value)) {
+      setError("Password must be 8 character");
+      return;
+    }
+    if (!/(?=.*[!@#$&*])/.test(e.target.value)) {
+      setError("Password should be have one special character");
+      return;
+    }
+    if (!/(?=.*[A-Z])/.test(e.target.value)) {
+      setError("Password must be one capital latter");
+      return;
+    }
+    setPassword(e.target.value);
+    setError("");
+  };
+
+  const handleRegister = (e) => {
+    e.preventDefault();
+    if ((name, email, password)) {
+      createUserWithEmailAndPassword(auth, email, password)
+        .then((userCredential) => {
+          // Signed in
+          const user = userCredential.user;
+          console.log(user);
+          updateName();
+          verifyEmail();
+          setError("");
+          Swal.fire(
+            'Good job!',
+            'You clicked the button!',
+            'success'
+          )
+          // ...
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setError(errorMessage);
+          // ..
+        });
+    } else {
+      setError("Please fil out all the field");
+      return;
+    }
+  };
+
+  const updateName = () => {
+    updateProfile(auth.currentUser, {
+      displayName: name,
+    })
+      .then(() => {
+        // Profile updated!
+        // ...
+      })
+      .catch((error) => {
+        // An error occurred
+        // ...
+      });
+  };
+
+  const verifyEmail = () => {
+    sendEmailVerification(auth.currentUser).then(() => {
+      // Email verification sent!
+      // ...
+    });
+    toast.info("Check your email and verify", { autoClose: 5000 });
   };
 
   return (
@@ -51,24 +134,33 @@ const Register = () => {
                   required
                 />
                 <input
+                  onBlur={handlePassword}
                   className="form-control p-3 m-2"
                   type="password"
                   placeholder="password"
                   required
                 />
                 <p className="link ">
-                  <Link to="/login" className="text-decoration-none">
-                    <small className="text-danger link">
-                      already have an account? please login
-                    </small>
-                  </Link>
+                  <small className="text-danger link">
+                    Already have an account?{" "}
+                    <Link to="/login" className="text-decoration-none">
+                      {" "}
+                      Please Login
+                    </Link>
+                  </small>
                 </p>
-                <input className="p-2" type="checkbox" />{" "}
+                <input
+                  onClick={() => setIsDisable(!isDisable)}
+                  className="p-2"
+                  type="checkbox"
+                />{" "}
                 <span className="mb-3">accept term & condition</span>
                 <br />
                 <button
+                  onClick={handleRegister}
                   type="submit"
                   className="btn btn-info p-3 w-50 mt-3 fw-bold text-white"
+                  disabled={isDisable}
                 >
                   Register
                 </button>
