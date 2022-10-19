@@ -1,7 +1,11 @@
 import "./Header.css";
 import { Link } from "react-router-dom";
+import { useContext } from "react";
+import { UserContext } from "../Layout/Main";
 
-const Header = ({ user, setUser }) => {
+const Header = () => {
+  const {user} = useContext(UserContext)
+
 
   return (
     <div>
@@ -43,7 +47,7 @@ const Header = ({ user, setUser }) => {
             </li>
           </Link>
           <li className="nav-link items  ms-3 text-info fw-bolder">
-            {user?.displayName}
+            {user?.uid && <span>{user?.displayName}</span>}
           </li>
         </div>
       </nav>

@@ -10,6 +10,8 @@ import {
 import app from "../../Hooks/firebase.config";
 import { toast } from "react-toastify";
 import Swal from 'sweetalert2'
+import { useContext } from "react";
+import { UserContext } from "../Layout/Main";
 
 
 
@@ -20,7 +22,9 @@ const Register = () => {
   const [error, setError] = useState("");
   const [isDisable, setIsDisable] = useState(true);
   const auth = getAuth(app);
+  const {user, setUser} = useContext(UserContext)
 
+  
   const handleName = (e) => {
     setName(e.target.value);
   };
@@ -58,8 +62,8 @@ const Register = () => {
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
           // Signed in
-          const user = userCredential.user;
-          console.log(user);
+          const userInfo = userCredential.user;
+          setUser(userInfo)
           updateName();
           verifyEmail();
           setError("");
