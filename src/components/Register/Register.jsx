@@ -4,16 +4,17 @@ import { Link } from "react-router-dom";
 import {
   createUserWithEmailAndPassword,
   getAuth,
+  onAuthStateChanged,
   sendEmailVerification,
   updateProfile,
 } from "firebase/auth";
 import app from "../../Hooks/firebase.config";
 import { toast } from "react-toastify";
-import Swal from 'sweetalert2'
+import Swal from "sweetalert2";
 import { useContext } from "react";
 import { UserContext } from "../Layout/Main";
-
-
+import handleSignInGoogle from "../../Hooks/googleSignUp";
+import { useEffect } from "react";
 
 const Register = () => {
   const [name, setName] = useState("");
@@ -22,9 +23,8 @@ const Register = () => {
   const [error, setError] = useState("");
   const [isDisable, setIsDisable] = useState(true);
   const auth = getAuth(app);
-  const {user, setUser} = useContext(UserContext)
+  const { user, setUser } = useContext(UserContext);
 
-  
   const handleName = (e) => {
     setName(e.target.value);
   };
@@ -63,15 +63,11 @@ const Register = () => {
         .then((userCredential) => {
           // Signed in
           const userInfo = userCredential.user;
-          setUser(userInfo)
+          setUser(userInfo);
           updateName();
           verifyEmail();
           setError("");
-          Swal.fire(
-            'Good job!',
-            'You clicked the button!',
-            'success'
-          )
+          Swal.fire("Good job!", "You clicked the button!", "success");
           // ...
         })
         .catch((error) => {
@@ -107,6 +103,21 @@ const Register = () => {
     });
     toast.info("Check your email and verify", { autoClose: 5000 });
   };
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        // User is signed in, see docs for a list of available properties
+        // https://firebase.google.com/docs/reference/js/firebase.User
+        const uid = user.uid;
+        setUser(user)
+        // ...
+      } else {
+        // User is signed out
+        // ...
+      }
+    });
+  }, [auth, setUser]);
 
   return (
     <div>
@@ -170,7 +181,10 @@ const Register = () => {
                 </button>
               </form>
             </div>
-            <button className="btn mt-3 border d-flex align-items-center justify-content-evenly p-2 m-auto">
+            <button
+              onClick={handleSignInGoogle}
+              className="btn mt-3 border d-flex align-items-center justify-content-evenly p-2 m-auto"
+            >
               <img
                 className="w-25 image-fluid btn-image"
                 src="https://img.icons8.com/color/344/google-logo.png"

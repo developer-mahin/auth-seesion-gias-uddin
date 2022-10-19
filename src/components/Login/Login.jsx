@@ -6,6 +6,7 @@ import app from "../../Hooks/firebase.config";
 import "./Login";
 import Swal from "sweetalert2";
 import ResetPassword from "../ResetPassword/ResetPassword";
+import handleSignInGoogle from "../../Hooks/googleSignUp";
 
 
 const Login = () => {
@@ -105,7 +106,7 @@ const Login = () => {
                 Login
               </button>
             </div>
-            <button className="btn mt-3 border d-flex align-items-center justify-content-evenly p-2 m-auto">
+            <button onClick={handleSignInGoogle} className="btn mt-3 border d-flex align-items-center justify-content-evenly p-2 m-auto">
               <img
                 className="w-25 image-fluid btn-image"
                 src="https://img.icons8.com/color/344/google-logo.png"
